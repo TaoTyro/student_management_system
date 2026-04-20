@@ -3,6 +3,10 @@
 #include <algorithm>
 #include <cctype>
 #include <fstream>
+#include <iomanip>
+#include <limits>
+#include <numeric>
+#include <ostream>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -20,6 +24,15 @@ std::string trimCopy(const std::string& value) {
         return std::isspace(ch) != 0;
     }).base();
     return std::string(begin, end);
+}
+
+std::string toLowerCopy(const std::string& value) {
+    std::string lowered;
+    lowered.reserve(value.size());
+    for (unsigned char ch : value) {
+        lowered.push_back(static_cast<char>(std::tolower(ch)));
+    }
+    return lowered;
 }
 
 std::vector<std::string> splitByDelimiter(const std::string& value, char delimiter) {
@@ -156,6 +169,19 @@ bool Database::appendToFile(const Student& student) const {
     return output.good();
 }
 
+bool Database::addStudent(const Student& student) {
+    if (!addToMemory(student)) {
+        return false;
+    }
+
+    if (!appendToFile(student)) {
+        students_.pop_back();
+        return false;
+    }
+
+    return true;
+}
+
 bool Database::addToMemory(const Student& student) {
     if (!student.isValid() || isDuplicateId(students_, student.getId())) {
         return false;
@@ -163,6 +189,75 @@ bool Database::addToMemory(const Student& student) {
 
     students_.push_back(student);
     return true;
+}
+
+void Database::displayStudents(std::ostream& os) const {
+    if (students_.empty()) {
+        os << "No student records found.\n";
+        return;
+    }
+
+    os << std::left << std::setw(12) << "ID" << std::setw(26) << "Name" << std::setw(8) << "Age" << std::setw(24)
+       << "Course" << std::setw(10) << "Marks" << '\n';
+    os << std::string(80, '-') << '\n';
+
+    const std::streamsize oldPrecision = os.precision();
+    const std::ios::fmtflags oldFlags = os.flags();
+
+    os << std::fixed << std::setprecision(2);
+    for (const Student& student : students_) {
+        os << std::left << std::setw(12) << student.getId() << std::setw(26) << student.getName() << std::setw(8)
+           << student.getAge() << std::setw(24) << student.getCourse() << std::setw(10) << student.getMarks()
+           << '\n';
+    }
+
+    os.flags(oldFlags);
+    os.precision(oldPrecision);
+}
+
+std::vector<Student> Database::searchStudent(const std::string& query) const {
+    std::vector<Student> matches;
+    const std::string normalizedQuery = trimCopy(query);
+    if (normalizedQuery.empty()) {
+        return matches;
+    }
+
+    const std::string lowerQuery = toLowerCopy(normalizedQuery);
+    for (const Student& student : students_) {
+        const bool idMatch = student.getId() == normalizedQuery;
+        const bool nameMatch = toLowerCopy(student.getName()).find(lowerQuery) != std::string::npos;
+
+        if (idMatch || nameMatch) {
+            matches.push_back(student);
+        }
+    }
+
+    return matches;
+}
+
+bool Database::calculateAverage(double& average) const {
+    if (students_.empty()) {
+        average = 0.0;
+        return false;
+    }
+
+    const double totalMarks =
+        std::accumulate(students_.begin(), students_.end(), 0.0,
+                        [](double runningTotal, const Student& student) { return runningTotal + student.getMarks(); });
+    average = totalMarks / static_cast<double>(students_.size());
+    return true;
+}
+
+const Student* Database::findTopStudent() const {
+    if (students_.empty()) {
+        return nullptr;
+    }
+
+    const auto topIterator = std::max_element(
+        students_.begin(), students_.end(),
+        [](const Student& left, const Student& right) { return left.getMarks() < right.getMarks(); });
+
+    return &(*topIterator);
 }
 
 const std::vector<Student>& Database::getStudents() const {

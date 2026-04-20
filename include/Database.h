@@ -1,6 +1,7 @@
 #ifndef DATABASE_H
 #define DATABASE_H
 
+#include <iosfwd>
 #include <string>
 #include <vector>
 
@@ -14,7 +15,13 @@ public:
     bool saveToFile() const;
     bool appendToFile(const Student& student) const;
 
+    bool addStudent(const Student& student);
     bool addToMemory(const Student& student);
+    void displayStudents(std::ostream& os) const;
+    std::vector<Student> searchStudent(const std::string& query) const;
+    bool calculateAverage(double& average) const;
+    const Student* findTopStudent() const;
+
     const std::vector<Student>& getStudents() const;
 
 private:

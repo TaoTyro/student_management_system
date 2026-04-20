@@ -1,0 +1,3 @@
+201|Alice Brown|20|CS|80.00
+202|Bob Stone|22|IT|70.00
+203|Jane Smith|19|SE|95.00
