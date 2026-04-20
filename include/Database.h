@@ -18,6 +18,9 @@ public:
     const std::vector<Student>& getStudents() const;
 
 private:
+    static bool tryParseStudentRecord(const std::string& line, Student& student);
+    static bool isDuplicateId(const std::vector<Student>& students, const std::string& id);
+
     std::vector<Student> students_;
     std::string filePath_;
 };

@@ -1,0 +1,5 @@
+101|John Doe|20|Computer Science|85.50
+102|Jane Smith|19|Information Tech|92.00
+103|Bob Johnson|22|Physics|45.00
+BAD-LINE
+104|Valid Person|23|Networks|76.0
