@@ -35,6 +35,7 @@ private:
     static std::string trimCopy(const std::string& value);
     static bool isNonEmptyTextField(const std::string& value);
     static bool containsFileDelimiter(const std::string& value);
+    static bool containsAlphabeticCharacter(const std::string& value);
 
     std::string id_;
     std::string name_;

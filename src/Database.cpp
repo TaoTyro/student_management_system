@@ -35,6 +35,10 @@ std::string toLowerCopy(const std::string& value) {
     return lowered;
 }
 
+std::string normalizeIdForComparison(const std::string& value) {
+    return toLowerCopy(trimCopy(value));
+}
+
 std::vector<std::string> splitByDelimiter(const std::string& value, char delimiter) {
     std::vector<std::string> parts;
     std::stringstream stream(value);
@@ -191,6 +195,17 @@ bool Database::addToMemory(const Student& student) {
     return true;
 }
 
+bool Database::hasStudentId(const std::string& id) const {
+    const std::string normalizedId = normalizeIdForComparison(id);
+    if (normalizedId.empty()) {
+        return false;
+    }
+
+    return std::any_of(students_.begin(), students_.end(), [&normalizedId](const Student& student) {
+        return normalizeIdForComparison(student.getId()) == normalizedId;
+    });
+}
+
 void Database::displayStudents(std::ostream& os) const {
     if (students_.empty()) {
         os << "No student records found.\n";
@@ -224,7 +239,7 @@ std::vector<Student> Database::searchStudent(const std::string& query) const {
 
     const std::string lowerQuery = toLowerCopy(normalizedQuery);
     for (const Student& student : students_) {
-        const bool idMatch = student.getId() == normalizedQuery;
+        const bool idMatch = normalizeIdForComparison(student.getId()) == normalizeIdForComparison(normalizedQuery);
         const bool nameMatch = toLowerCopy(student.getName()).find(lowerQuery) != std::string::npos;
 
         if (idMatch || nameMatch) {
@@ -337,6 +352,9 @@ bool Database::tryParseStudentRecord(const std::string& line, Student& student) 
 }
 
 bool Database::isDuplicateId(const std::vector<Student>& students, const std::string& id) {
+    const std::string normalizedId = normalizeIdForComparison(id);
     return std::any_of(students.begin(), students.end(),
-                       [&id](const Student& existingStudent) { return existingStudent.getId() == id; });
+                       [&normalizedId](const Student& existingStudent) {
+                           return normalizeIdForComparison(existingStudent.getId()) == normalizedId;
+                       });
 }

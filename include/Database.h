@@ -27,6 +27,7 @@ public:
 
     bool addStudent(const Student& student);
     bool addToMemory(const Student& student);
+    bool hasStudentId(const std::string& id) const;
     void displayStudents(std::ostream& os) const;
     std::vector<Student> searchStudent(const std::string& query) const;
     bool calculateAverage(double& average) const;

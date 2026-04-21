@@ -49,6 +49,11 @@ bool parseDoubleStrict(const std::string& value, double& output) {
     }
 }
 
+bool containsAlphabeticCharacter(const std::string& value) {
+    return std::any_of(value.begin(), value.end(),
+                       [](unsigned char character) { return std::isalpha(character) != 0; });
+}
+
 std::string promptRequiredText(const std::string& label) {
     for (;;) {
         std::cout << label;
@@ -66,6 +71,28 @@ std::string promptRequiredText(const std::string& label) {
             continue;
         }
 
+        return value;
+    }
+}
+
+std::string promptUniqueStudentId(const Database& database) {
+    for (;;) {
+        const std::string id = promptRequiredText("Enter Student ID: ");
+        if (database.hasStudentId(id)) {
+            std::cout << "Student ID already exists. Please enter a unique ID.\n";
+            continue;
+        }
+        return id;
+    }
+}
+
+std::string promptAlphabeticText(const std::string& label, const std::string& fieldName) {
+    for (;;) {
+        const std::string value = promptRequiredText(label);
+        if (!containsAlphabeticCharacter(value)) {
+            std::cout << fieldName << " must contain at least one letter.\n";
+            continue;
+        }
         return value;
     }
 }
@@ -218,17 +245,17 @@ int main() {
         switch (choice) {
             case 1: {
                 try {
-                    const std::string id = promptRequiredText("Enter Student ID: ");
-                    const std::string name = promptRequiredText("Enter Student Name: ");
+                    const std::string id = promptUniqueStudentId(database);
+                    const std::string name = promptAlphabeticText("Enter Student Name: ", "Student name");
                     const int age = promptPositiveAge();
-                    const std::string course = promptRequiredText("Enter Course: ");
+                    const std::string course = promptAlphabeticText("Enter Course: ", "Course");
                     const double marks = promptValidMarks();
 
                     Student student(id, name, age, course, marks);
                     if (database.addStudent(student)) {
                         std::cout << "Student added successfully.\n";
                     } else {
-                        std::cout << "Failed to add student. Ensure the ID is unique and file is writable.\n";
+                        std::cout << "Failed to add student because data could not be written to file.\n";
                     }
                 } catch (const std::exception& ex) {
                     std::cout << "Invalid student data: " << ex.what() << '\n';

@@ -48,7 +48,8 @@ void Student::setId(const std::string& id) {
 void Student::setName(const std::string& name) {
     const std::string normalized = trimCopy(name);
     if (!isValidName(normalized)) {
-        throw std::invalid_argument("Student name must not be empty and cannot contain '|'.");
+        throw std::invalid_argument(
+            "Student name must not be empty, cannot contain '|', and must include at least one letter.");
     }
     name_ = normalized;
 }
@@ -63,7 +64,7 @@ void Student::setAge(int age) {
 void Student::setCourse(const std::string& course) {
     const std::string normalized = trimCopy(course);
     if (!isValidCourse(normalized)) {
-        throw std::invalid_argument("Course must not be empty and cannot contain '|'.");
+        throw std::invalid_argument("Course must not be empty, cannot contain '|', and must include at least one letter.");
     }
     course_ = normalized;
 }
@@ -100,7 +101,7 @@ bool Student::isValidId(const std::string& id) {
 }
 
 bool Student::isValidName(const std::string& name) {
-    return isNonEmptyTextField(name);
+    return isNonEmptyTextField(name) && containsAlphabeticCharacter(name);
 }
 
 bool Student::isValidAge(int age) {
@@ -108,7 +109,7 @@ bool Student::isValidAge(int age) {
 }
 
 bool Student::isValidCourse(const std::string& course) {
-    return isNonEmptyTextField(course);
+    return isNonEmptyTextField(course) && containsAlphabeticCharacter(course);
 }
 
 bool Student::isValidMarks(double marks) {
@@ -135,4 +136,9 @@ bool Student::isNonEmptyTextField(const std::string& value) {
 
 bool Student::containsFileDelimiter(const std::string& value) {
     return value.find('|') != std::string::npos;
+}
+
+bool Student::containsAlphabeticCharacter(const std::string& value) {
+    return std::any_of(value.begin(), value.end(),
+                       [](unsigned char character) { return std::isalpha(character) != 0; });
 }
