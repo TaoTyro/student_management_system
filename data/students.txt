@@ -1,2 +1,3 @@
-BICT0823|Taonga Kamanga|23|Programming in C++|23.00
-BICT0824|Tao|4|C++|45.00
+6272|Taonga Kamanga|23|Programming in C++|23.00
+BICT0823|Tao Tyro|1000|C++|60.00
+BICT0824|Tao|23|C++|99.00
