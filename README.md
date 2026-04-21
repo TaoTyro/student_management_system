@@ -23,23 +23,23 @@ Console-based student record management system with file persistence and statist
 
 ```text
 student_management_system/
-├── include/
-│   ├── Student.h
-│   ├── Database.h
-│   └── Utils.h
-├── src/
-│   ├── main.cpp
-│   ├── Student.cpp
-│   ├── Database.cpp
-│   └── Utils.cpp
-├── data/
-│   └── students.txt
-├── tests/
-│   ├── phase4_core_test.cpp
-│   ├── phase6_statistics_test.cpp
-│   └── phase7_validation_test.cpp
-├── build/
-└── Makefile
++-- include/
+|   +-- Student.h
+|   +-- Database.h
+|   `-- Utils.h
++-- src/
+|   +-- main.cpp
+|   +-- Student.cpp
+|   +-- Database.cpp
+|   `-- Utils.cpp
++-- data/
+|   `-- students.txt
++-- tests/
+|   +-- phase4_core_test.cpp
+|   +-- phase6_statistics_test.cpp
+|   `-- phase7_validation_test.cpp
++-- build/
+`-- Makefile
 ```
 
 ## Requirements
