@@ -2,3 +2,4 @@
 BICT0823|Tao Tyro|1000|C++|60.00
 BICT0824|Tao|23|C++|99.00
 BICT0825|Taonga kamanga|23|Computer programming|90.00
+Bict9823|Taonga Banda|23|C++|78.00
