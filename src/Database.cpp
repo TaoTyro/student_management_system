@@ -260,6 +260,58 @@ const Student* Database::findTopStudent() const {
     return &(*topIterator);
 }
 
+const Student* Database::findLowestStudent() const {
+    if (students_.empty()) {
+        return nullptr;
+    }
+
+    const auto lowestIterator = std::min_element(
+        students_.begin(), students_.end(),
+        [](const Student& left, const Student& right) { return left.getMarks() < right.getMarks(); });
+
+    return &(*lowestIterator);
+}
+
+bool Database::calculateStatistics(double passMark, Statistics& statistics) const {
+    if (passMark < 0.0 || passMark > 100.0) {
+        return false;
+    }
+
+    statistics = Statistics{};
+    statistics.totalStudents = students_.size();
+    if (students_.empty()) {
+        return true;
+    }
+
+    const Student* highest = &students_.front();
+    const Student* lowest = &students_.front();
+    double marksTotal = 0.0;
+
+    for (const Student& student : students_) {
+        const double marks = student.getMarks();
+        marksTotal += marks;
+
+        if (marks >= passMark) {
+            ++statistics.passedStudents;
+        } else {
+            ++statistics.failedStudents;
+        }
+
+        if (marks > highest->getMarks()) {
+            highest = &student;
+        }
+        if (marks < lowest->getMarks()) {
+            lowest = &student;
+        }
+    }
+
+    statistics.averageMarks = marksTotal / static_cast<double>(students_.size());
+    statistics.highestScorer = *highest;
+    statistics.lowestScorer = *lowest;
+    statistics.hasData = true;
+    return true;
+}
+
 const std::vector<Student>& Database::getStudents() const {
     return students_;
 }

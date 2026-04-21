@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <cctype>
+#include <iomanip>
 #include <iostream>
 #include <sstream>
 #include <string>
@@ -103,6 +104,23 @@ double promptValidMarks() {
     }
 }
 
+double promptPassMarkThreshold() {
+    for (;;) {
+        std::cout << "Enter Pass Threshold (0-100): ";
+        std::string line;
+        std::getline(std::cin, line);
+        line = Utils::trim(line);
+
+        double passMark = 0.0;
+        if (!parseDoubleStrict(line, passMark) || passMark < 0.0 || passMark > 100.0) {
+            std::cout << "Invalid threshold. Enter a number between 0 and 100.\n";
+            continue;
+        }
+
+        return passMark;
+    }
+}
+
 int promptMenuChoice() {
     for (;;) {
         std::cout << "Enter your choice: ";
@@ -134,24 +152,52 @@ void printSearchResults(const std::vector<Student>& matches) {
     }
 }
 
-void showBasicStatistics(const Database& database) {
-    const std::size_t totalStudents = database.getStudents().size();
-    if (totalStudents == 0) {
+void showDetailedStatistics(const Database& database) {
+    if (database.getStudents().empty()) {
         std::cout << "No student data available for statistics.\n";
         return;
     }
 
-    double average = 0.0;
-    database.calculateAverage(average);
-    const Student* topStudent = database.findTopStudent();
+    const double passThreshold = promptPassMarkThreshold();
+    Database::Statistics statistics;
+    if (!database.calculateStatistics(passThreshold, statistics)) {
+        std::cout << "Could not compute statistics due to invalid threshold.\n";
+        return;
+    }
 
-    std::cout << "\n=== CURRENT STATISTICS ===\n";
-    std::cout << "Total Students: " << totalStudents << '\n';
-    std::cout << "Average Marks: " << average << '\n';
-    if (topStudent != nullptr) {
-        std::cout << "Top Student: " << topStudent->getName() << " (" << topStudent->getMarks() << ")\n";
+    const double passPercentage =
+        statistics.totalStudents == 0
+            ? 0.0
+            : (static_cast<double>(statistics.passedStudents) * 100.0 / static_cast<double>(statistics.totalStudents));
+    const double failPercentage =
+        statistics.totalStudents == 0
+            ? 0.0
+            : (static_cast<double>(statistics.failedStudents) * 100.0 / static_cast<double>(statistics.totalStudents));
+
+    const std::streamsize oldPrecision = std::cout.precision();
+    const std::ios::fmtflags oldFlags = std::cout.flags();
+
+    std::cout << std::fixed << std::setprecision(2);
+    std::cout << "\n=== STUDENT STATISTICS ===\n";
+    std::cout << "Pass Threshold: " << passThreshold << '\n';
+    std::cout << "Total Students: " << statistics.totalStudents << '\n';
+    std::cout << "Average Marks: " << statistics.averageMarks << "\n\n";
+
+    std::cout << "Pass/Fail Analysis:\n";
+    std::cout << "- Passed: " << statistics.passedStudents << " students (" << passPercentage << "%)\n";
+    std::cout << "- Failed: " << statistics.failedStudents << " students (" << failPercentage << "%)\n\n";
+
+    if (statistics.hasData) {
+        std::cout << "Score Range:\n";
+        std::cout << "- Highest: " << statistics.highestScorer.getMarks() << " (" << statistics.highestScorer.getName()
+                  << ")\n";
+        std::cout << "- Lowest: " << statistics.lowestScorer.getMarks() << " (" << statistics.lowestScorer.getName()
+                  << ")\n";
     }
     std::cout << "==========================\n";
+
+    std::cout.flags(oldFlags);
+    std::cout.precision(oldPrecision);
 }
 } // namespace
 
@@ -199,7 +245,7 @@ int main() {
                 break;
             }
             case 4:
-                showBasicStatistics(database);
+                showDetailedStatistics(database);
                 break;
             case 5:
                 if (database.saveToFile()) {

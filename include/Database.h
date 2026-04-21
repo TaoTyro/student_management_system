@@ -9,6 +9,16 @@
 
 class Database {
 public:
+    struct Statistics {
+        std::size_t totalStudents = 0;
+        std::size_t passedStudents = 0;
+        std::size_t failedStudents = 0;
+        double averageMarks = 0.0;
+        Student highestScorer;
+        Student lowestScorer;
+        bool hasData = false;
+    };
+
     explicit Database(const std::string& filePath = "data/students.txt");
 
     bool loadFromFile();
@@ -21,6 +31,8 @@ public:
     std::vector<Student> searchStudent(const std::string& query) const;
     bool calculateAverage(double& average) const;
     const Student* findTopStudent() const;
+    const Student* findLowestStudent() const;
+    bool calculateStatistics(double passMark, Statistics& statistics) const;
 
     const std::vector<Student>& getStudents() const;
 
